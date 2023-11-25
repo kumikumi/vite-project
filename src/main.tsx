@@ -4,7 +4,6 @@ import { Provider } from 'react-redux'
 
 // eslint-disable-next-line import/order
 import App from './App.tsx'
-import './index.css'
 
 import { Store } from './redux/Store.ts'
 
