@@ -27,16 +27,11 @@ module.exports = {
   ],
   plugins: [
     'react',
-    'react-refresh',
     '@typescript-eslint',
     'prettier',
     'eslint-plugin-import'
   ],
   rules: {
-    'react-refresh/only-export-components': [
-      'warn',
-      { allowConstantExport: true },
-    ],
     'react/react-in-jsx-scope': 'off',
     '@typescript-eslint/consistent-type-assertions': 'warn',
     'prettier/prettier': 'warn',
@@ -76,7 +71,8 @@ module.exports = {
     'no-undef': 'off',
     'eqeqeq': 'warn',
     '@typescript-eslint/no-unsafe-assignment': 'warn',
-    '@typescript-eslint/no-unused-expressions': 'warn'
+    '@typescript-eslint/no-unused-expressions': 'warn',
+    '@typescript-eslint/no-explicit-any': 'off'
   },
   settings: {
     react: {
