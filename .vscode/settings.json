@@ -1,0 +1,6 @@
+{
+    "editor.codeActionsOnSave": {
+        "source.fixAll": true
+    },
+    "editor.semanticHighlighting.enabled": false
+}
