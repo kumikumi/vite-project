@@ -118,6 +118,6 @@ class RouterHistory {
 export const history = new RouterHistory()
 
 function promptBeforeUnload(event: BeforeUnloadEvent) {
-	//event.preventDefault()
+	event.preventDefault()
 	event.returnValue = ''
 }
