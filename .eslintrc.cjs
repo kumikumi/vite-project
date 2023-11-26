@@ -34,6 +34,11 @@ module.exports = {
   rules: {
     'react/react-in-jsx-scope': 'off',
     '@typescript-eslint/consistent-type-assertions': 'warn',
+    '@typescript-eslint/ban-types': ['warn', {
+      types: {
+        "{}": false
+      }
+    }],
     'prettier/prettier': 'warn',
     'no-var': 'warn',
     'prefer-const': 'warn',

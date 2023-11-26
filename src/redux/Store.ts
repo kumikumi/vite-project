@@ -25,10 +25,12 @@ export const Store = configureStore<
 export type AppDispatch = typeof Store.dispatch
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const typecheck = () => {
+const typecheck = (validAction: ReduxAction) => {
 	//@ts-expect-error If this line goes red, type checking of Store.dispatch has failed.
 	//Make sure that every reducer has its action properly typed.
 	Store.dispatch({ type: 'nonexistent' })
+	// This should not cause an error
+	Store.dispatch(validAction)
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
