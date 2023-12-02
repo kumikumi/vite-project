@@ -1,13 +1,15 @@
-type Update = {
+type Update = Readonly<{
 	action: 'push' | 'pop' | 'replace'
 	url: string
-}
+}>
 
 export type Blocker = (update: Update, confirm: () => void) => void
+export type Listener = (update: Update) => void
 
 class RouterHistory {
 	public windowHistory: History
 	private blockers: Array<Blocker>
+	private listeners: Array<Listener>
 	private useOnbeforeunload: boolean
 	private idx: number
 	private ignorePop = false
@@ -16,6 +18,7 @@ class RouterHistory {
 	constructor() {
 		this.windowHistory = window.history
 		this.blockers = []
+		this.listeners = []
 		this.useOnbeforeunload = false
 		this.idx = 0
 		this.windowHistory.replaceState({ ...this.windowHistory.state, idx: 0 }, '')
@@ -23,7 +26,6 @@ class RouterHistory {
 	}
 
 	private confirmNavigation(update: Update, callback: () => void) {
-		console.log('Confirm ', update)
 		const firstBlocker = this.blockers[0]
 		if (!firstBlocker) {
 			callback()
@@ -43,39 +45,43 @@ class RouterHistory {
 	}
 
 	public push(url: string) {
-		console.log('push ', url)
 		const normalizedUrl = normalizeUrl(url)
-		this.confirmNavigation(
-			{
-				action: 'push',
-				url: normalizedUrl,
-			},
-			() => {
-				this.windowHistory.pushState({ idx: ++this.idx }, '', normalizedUrl)
-			}
-		)
+		const update: Update = {
+			action: 'push',
+			url: normalizedUrl,
+		}
+		this.confirmNavigation(update, () => {
+			this.windowHistory.pushState({ idx: ++this.idx }, '', normalizedUrl)
+			this.notifyListeners(update)
+		})
 	}
 
 	public replace(url: string) {
-		console.log('replace ', url)
 		const normalizedUrl = normalizeUrl(url)
-		this.confirmNavigation(
-			{
-				action: 'replace',
-				url: normalizedUrl,
-			},
-			() => {
-				this.windowHistory.replaceState({ idx: this.idx }, '', normalizedUrl)
-			}
-		)
+		const update: Update = {
+			action: 'replace',
+			url: normalizedUrl,
+		}
+		this.confirmNavigation(update, () => {
+			this.windowHistory.replaceState({ idx: this.idx }, '', normalizedUrl)
+			this.notifyListeners(update)
+		})
 	}
 
 	public get length() {
 		return this.windowHistory.length
 	}
 
+	public listen(listener: Listener) {
+		const listenerIdx = this.listeners.push(listener) - 1
+		return () => {
+			this.listeners.copyWithin(listenerIdx, listenerIdx + 1)
+			this.listeners.pop()
+		}
+	}
+
 	public block(blocker: Blocker) {
-		const blockerIdx = this.blockers.push(blocker)
+		const blockerIdx = this.blockers.push(blocker) - 1
 
 		if (this.blockers.length === 1) {
 			this.useOnbeforeunload = window.onbeforeunload === null
@@ -97,6 +103,11 @@ class RouterHistory {
 				}
 			}
 		}
+	}
+
+	private notifyListeners(update: Update) {
+		console.log('[router]', update)
+		this.listeners.forEach((listener) => listener(update))
 	}
 
 	private handlePop() {
@@ -131,6 +142,7 @@ class RouterHistory {
 				this.ignorePop = true
 				this.windowHistory.go(-delta)
 				this.idx = idx
+				this.notifyListeners(update)
 			})
 		}
 		this.windowHistory.go(delta)

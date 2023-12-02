@@ -38,9 +38,9 @@ function App() {
 			<header className="container">
 				<h1>Header</h1>
 				<NavigationBlock
-					blocker={(url, confirmNavigation) => {
+					blocker={(update, confirmNavigation) => {
 						// eslint-disable-next-line no-alert
-						const result = confirm(`Confirm navigation to ${url}`)
+						const result = confirm(`Confirm navigation to ${update}`)
 						if (result) {
 							confirmNavigation()
 						}
