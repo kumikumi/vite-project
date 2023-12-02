@@ -5,7 +5,8 @@ import { Store, useSelector } from './redux/Store'
 import viteLogo from '/vite.svg'
 
 import reactLogo from './assets/react.svg'
-import { Blocker, history } from './a-router/history'
+import { Blocker } from './a-router/history'
+import { history } from './router'
 
 import './App.css'
 

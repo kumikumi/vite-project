@@ -1,4 +1,4 @@
-type Update = Readonly<{
+export type Update = Readonly<{
 	action: 'push' | 'pop' | 'replace'
 	url: string
 }>
@@ -6,7 +6,7 @@ type Update = Readonly<{
 export type Blocker = (update: Update, confirm: () => void) => void
 export type Listener = (update: Update) => void
 
-class RouterHistory {
+export class RouterHistory {
 	public windowHistory: History
 	private blockers: Array<Blocker>
 	private listeners: Array<Listener>
@@ -149,7 +149,7 @@ class RouterHistory {
 	}
 }
 
-const normalizeUrl = (url: string) => {
+export const normalizeUrl = (url: string) => {
 	// Todo: this probably needs more rigorous testing
 	if (url.includes(':')) {
 		const origin = location.origin
@@ -160,8 +160,6 @@ const normalizeUrl = (url: string) => {
 	}
 	return `${url.startsWith('/') ? '' : '/'}${url}`
 }
-
-export const history = new RouterHistory()
 
 function promptBeforeUnload(event: BeforeUnloadEvent) {
 	event.preventDefault()

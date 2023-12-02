@@ -3,9 +3,11 @@ import { useSelector as useReactReduxSelector } from 'react-redux'
 
 import { counter } from './counter'
 import { ReduxAction } from './ReduxAction'
+import { routerLocation } from './routerLocation'
 
 const rootReducers = {
 	counter,
+	routerLocation,
 } as const
 type RootReducersRecord = typeof rootReducers
 type ValueFromReducer<T> = T extends Reducer<infer S> ? S : never

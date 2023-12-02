@@ -2,6 +2,9 @@ type ReduxVoidActions = 'counter/increment' | 'counter/decrement'
 type ReduxActionsWithPayload = {
 	'counter/incrementBy': number
 	'counter/decrementBy': number
+	'router/push': string
+	'router/pop': string
+	'router/replace': string
 }
 
 type ReduxVoidActionsRecord = { [K in ReduxVoidActions]: { type: K } }
