@@ -1,5 +1,9 @@
-// Todo: change "url" to transition info object, normalize url format, add transition type (push / pop / go)
-export type Blocker = (url: string, confirm: () => void) => void
+type Update = {
+	action: 'push' | 'pop' | 'replace'
+	url: string
+}
+
+export type Blocker = (update: Update, confirm: () => void) => void
 
 class RouterHistory {
 	public windowHistory: History
@@ -18,7 +22,8 @@ class RouterHistory {
 		window.onpopstate = this.handlePop.bind(this)
 	}
 
-	private confirmNavigation(url: string, callback: () => void) {
+	private confirmNavigation(update: Update, callback: () => void) {
+		console.log('Confirm ', update)
 		const firstBlocker = this.blockers[0]
 		if (!firstBlocker) {
 			callback()
@@ -31,24 +36,38 @@ class RouterHistory {
 			if (!blocker) {
 				callback()
 			} else {
-				blocker(url, confirm)
+				blocker(update, confirm)
 			}
 		}
-		firstBlocker(url, confirm)
+		firstBlocker(update, confirm)
 	}
 
 	public push(url: string) {
 		console.log('push ', url)
-		this.confirmNavigation(url, () => {
-			this.windowHistory.pushState({ idx: ++this.idx }, '', url)
-		})
+		const normalizedUrl = normalizeUrl(url)
+		this.confirmNavigation(
+			{
+				action: 'push',
+				url: normalizedUrl,
+			},
+			() => {
+				this.windowHistory.pushState({ idx: ++this.idx }, '', normalizedUrl)
+			}
+		)
 	}
 
 	public replace(url: string) {
 		console.log('replace ', url)
-		this.confirmNavigation(url, () => {
-			this.windowHistory.replaceState({ idx: this.idx }, '', url)
-		})
+		const normalizedUrl = normalizeUrl(url)
+		this.confirmNavigation(
+			{
+				action: 'replace',
+				url: normalizedUrl,
+			},
+			() => {
+				this.windowHistory.replaceState({ idx: this.idx }, '', normalizedUrl)
+			}
+		)
 	}
 
 	public get length() {
@@ -100,12 +119,15 @@ class RouterHistory {
 			this.idx = idx
 			return
 		}
-		const url = window.location.pathname + window.location.search
+		const url = normalizeUrl(window.location.href)
+		const update: Update = {
+			action: 'pop',
+			url,
+		}
 		// If there are blockers: revert pop first, get confirmation, then re-do pop if approved
 		this.ignorePop = true
 		this.popCallback = () => {
-			this.confirmNavigation(url, () => {
-				console.log('Confirmed')
+			this.confirmNavigation(update, () => {
 				this.ignorePop = true
 				this.windowHistory.go(-delta)
 				this.idx = idx
@@ -113,6 +135,18 @@ class RouterHistory {
 		}
 		this.windowHistory.go(delta)
 	}
+}
+
+const normalizeUrl = (url: string) => {
+	// Todo: this probably needs more rigorous testing
+	if (url.includes(':')) {
+		const origin = location.origin
+		if (!url.startsWith(origin)) {
+			throw new Error("Can't use external url with history API")
+		}
+		return url.substring(origin.length)
+	}
+	return `${url.startsWith('/') ? '' : '/'}${url}`
 }
 
 export const history = new RouterHistory()
